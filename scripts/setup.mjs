@@ -1,0 +1,17 @@
+import {mkdirSync,existsSync,writeFileSync} from 'node:fs';
+import {randomBytes,scryptSync} from 'node:crypto';
+import {resolve} from 'node:path';
+import {dataDir} from '../src/config.mjs';
+import {openStore} from '../src/store.mjs';
+import {emptyState} from '../src/model.mjs';
+import {demoState} from '../examples/demo.mjs';
+if(existsSync(resolve(dataDir,'config.json'))) throw Error('Already configured. Edit .local/config.json; setup never overwrites existing data.');
+const tz=process.env.CAMPUS_TIMEZONE||Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+const origin=process.env.CAMPUS_ORIGIN||'http://localhost:4173';
+const key=randomBytes(24).toString('base64url'),salt=randomBytes(16).toString('hex');
+const config={origin,host:'127.0.0.1',port:4173,timeZone:tz,salt,passwordHash:scryptSync(key,salt,64).toString('hex'),instanceId:randomBytes(16).toString('hex')};
+mkdirSync(dataDir,{recursive:true,mode:0o700});
+writeFileSync(resolve(dataDir,'config.json'),JSON.stringify(config,null,2)+'\n',{mode:0o600});
+writeFileSync(resolve(dataDir,'login-key.txt'),key+'\n',{mode:0o600});
+openStore(resolve(dataDir,'planner.sqlite'),process.argv.includes('--demo')?demoState(tz):emptyState(tz)).close();
+console.log(`Configured ${origin}. Login key saved privately to ${dataDir}/login-key.txt.\nOpen that file locally to sign in; do not paste its contents into chat or GitHub.\nNext: npm start. ${process.argv.includes('--demo')?'Fictional demonstration records installed.':'Your planner starts empty.'}`);

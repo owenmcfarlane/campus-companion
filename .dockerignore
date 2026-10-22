@@ -1,0 +1,8 @@
+.git
+.local
+.env*
+*.sqlite*
+backups
+setup-state.local.md
+source-packet.local.json
+node_modules

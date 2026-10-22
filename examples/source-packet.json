@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "tasks": [{"id":"example:course-1:assignment-1","title":"Sample assignment — replace with verified course data","course":"Example Course","kind":"assignment","dueAt":null,"availableAt":null,"sourceUrl":"https://example.edu/assignment","notes":"New source notes are intentionally not imported into personal notes."}],
+  "sources": [{"id":"example:course-1:assignments","label":"Example course assignments","status":"partial","checkedAt":null,"note":"Example only. No course has been reviewed."}]
+}

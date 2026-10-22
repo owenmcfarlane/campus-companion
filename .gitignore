@@ -1,0 +1,16 @@
+.local/
+node_modules/
+.env
+.env.*
+!.env.example
+*.sqlite*
+*.db*
+*.log
+.DS_Store
+ios/**/xcuserdata/
+ios/**/DerivedData/
+ios/Local.xcconfig
+ios/Shared/LocalConfiguration.swift
+setup-state.local.md
+source-packet.local.json
+backups/

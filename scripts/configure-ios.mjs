@@ -1,0 +1,12 @@
+import {cpSync,existsSync,readFileSync,writeFileSync,readdirSync} from 'node:fs';import {resolve} from 'node:path';
+import {dataDir} from '../src/config.mjs';
+const arg=name=>process.argv[process.argv.indexOf(name)+1];
+for(const name of ['--host','--timezone','--bundle','--team'])if(!process.argv.includes(name))throw Error('Required: --host planner.example.org --timezone UTC --bundle org.yourname.campus --team APPLETEAMID');
+const host=arg('--host'),zone=arg('--timezone'),bundle=arg('--bundle'),team=arg('--team');
+if(!/^[a-z0-9.-]+$/.test(host)||host==='planner.example.org')throw Error('Supply your real HTTPS hostname, without a scheme, port or path');
+new Intl.DateTimeFormat('en',{timeZone:zone});
+if(!/^[a-zA-Z0-9.-]+$/.test(bundle)||! /^[A-Z0-9]{10}$/.test(team))throw Error('Invalid bundle prefix or Apple team');
+const destination=resolve(dataDir,'ios');if(existsSync(destination))throw Error('Private iOS copy exists; edit it directly to preserve changes.');
+cpSync('ios',destination,{recursive:true});
+function walk(dir){for(const e of readdirSync(dir,{withFileTypes:true})){const path=resolve(dir,e.name);if(e.isDirectory())walk(path);else if(/\.(swift|plist|pbxproj|entitlements)$/.test(path)){let text=readFileSync(path,'utf8').replaceAll('planner.example.org',host).replaceAll('org.example.campuscompanion.mobile',bundle).replaceAll('DEVELOPMENT_TEAM = "";',`DEVELOPMENT_TEAM = ${team};`).replace('static let timeZone = "UTC"',`static let timeZone = "${zone}"`);writeFileSync(path,text);}}}walk(destination);
+console.log(`Private configured project: ${destination}/CampusCompanion.xcodeproj\nOpen it in Xcode; verify signing, enable the matching App Group, select your phone, and Run.`);
